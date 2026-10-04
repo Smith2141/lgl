@@ -2,50 +2,55 @@ package main
 
 import (
 	"fmt"
-	"strings"
-	"time"
 )
 
-type Stopwatch struct {
-	startTime float64
-	intervals []float64
+// Person — структура, описывающая человека.
+type Person struct {
+	Name string
+	Year int
 }
 
-func (sw *Stopwatch) Start() {
-	sw.startTime = float64(time.Now().UnixNano())
-}
-
-func (sw *Stopwatch) SaveSplit() {
-	newInterval := float64(time.Now().UnixNano())
-	var interval float64 = (newInterval - sw.startTime)/ 1_000_000_000
-	sw.intervals = append(sw.intervals, float64(interval))
-}
-
-func (sw *Stopwatch) GetResults() string {
-	// return fmt.Printf("sw.intervals: %v\n", sw.intervals)
-	var result strings.Builder
-	for _, val := range sw.intervals {
-		fmt.Fprintf(&result, "%.9fs ", val/1000000000)
+// NewPerson возвращает новую структуру Person.
+func NewPerson(name string, year int) Person {
+	return Person{
+		Name: name,
+		Year: year,
 	}
+}
 
-	result2 := result.String()
-	result2 = strings.Trim(result2, " ")
-	result2 = "[" + result2 + "]"
-	return result2
+// String возвращает информацию о человеке.
+func (p Person) String() string {
+	return fmt.Sprintf("person string: Имя: %s, Год рождения: %d", p.Name, p.Year)
+}
+
+// Print выводит информацию о человеке.
+func (p Person) Print() {
+	// вызовется метод String() для Person
+	fmt.Println("person print: ", p)
+}
+
+// Student описывает студента с использованием вложенной структуры Person. То есть структура Student описывает.
+type Student struct {
+	Person // вложенный объект Person
+	Group  string
+}
+
+func NewStudent(name string, year int, group string) Student {
+	return Student{
+		Person: NewPerson(name, year), // Явно создаём структуру Person
+		Group:  group,
+	}
+}
+
+// String возвращает информацию о студенте.
+func (s Student) String() string {
+	return fmt.Sprintf("student string: %s, Группа: %s", s.Person, s.Group)
 }
 
 func main() {
-	sw := Stopwatch{}
-	sw.Start()
-
-	time.Sleep(1 * time.Second)
-	sw.SaveSplit()
-
-	time.Sleep(500 * time.Millisecond)
-	sw.SaveSplit()
-
-	time.Sleep(300 * time.Millisecond)
-	sw.SaveSplit()
-
-	fmt.Println(sw.GetResults())
+	s := NewStudent("John Doe", 1980, "701")
+	s.Print()
+	// вызовется метод String() для Student
+	fmt.Println(s)
+	fmt.Println(s.Name, s.Year, s.Group)
 }
