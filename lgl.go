@@ -13,41 +13,54 @@ const (
 	LogLevelInfo
 )
 
+func (l LogLevel) IsValid() bool {
+	switch l {
+	case LogLevelInfo, LogLevelWarning, LogLevelError:
+		return true
+	default:
+		return false
+	}
+}
+
 type LogExtended struct {
 	*log.Logger
 	logLevel LogLevel // LogLevel это enum
 }
 
-func NewLogExtended() LogExtended {
-	lp := log.New(os.Stdout, "MY_EXT_LOGGER ", 3)
-	return LogExtended{
-		lp,
-		LogLevelError,
+func NewLogExtended() *LogExtended {
+	return &LogExtended{
+		Logger:   log.New(os.Stdout, "", log.LstdFlags),
+		logLevel: LogLevelError,
 	}
 }
 
 func (logger *LogExtended) SetLogLevel(l LogLevel) {
+	if !l.IsValid() {
+		return
+	}
+
 	logger.logLevel = l
+
 }
 
 func (l *LogExtended) println(srcLogLvl LogLevel, prefix, msg string) {
-	// игнорируем сообщения, если уровень логгера меньше scrLogLvl
-	// ...
-	if l.logLevel >= srcLogLvl {
-		l.Logger.Println(prefix + msg)
+	if l.logLevel < srcLogLvl {
+		return
 	}
+
+	l.Logger.Println(prefix + msg)
 }
 
-func (l *LogExtended) Infoln(i string) {
-	l.println(LogLevelInfo, "[INFO] ", i)
+func (l *LogExtended) Infoln(message string) {
+	l.println(LogLevelInfo, "[INFO] ", message)
 }
 
-func (l *LogExtended) Errorln(i string) {
-	l.println(LogLevelError, "[ERROR] ", i)
+func (l *LogExtended) Errorln(message string) {
+	l.println(LogLevelError, "[ERROR] ", message)
 }
 
-func (l *LogExtended) Warnln(i string) {
-	l.println(LogLevelWarning, "[WARN] ", i)
+func (l *LogExtended) Warnln(message string) {
+	l.println(LogLevelWarning, "[WARN] ", message)
 }
 
 func main() {
