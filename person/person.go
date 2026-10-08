@@ -2,7 +2,7 @@ package person
 
 // Person - структура, описывающая человека
 type Person struct {
-	name     string
+	Name     string
 	homework string
 	children []*Person
 }
@@ -19,7 +19,7 @@ func (p Person) Children() []*Person {
 
 // Work — выполняет поручения на работе
 func (p Person) Work(tasks []string) string {
-	s := p.name + " work:"
+	s := p.Name + " work:"
 	for _, task := range tasks {
 		s += "\n I do " + task
 	}
@@ -28,5 +28,5 @@ func (p Person) Work(tasks []string) string {
 
 // String — сообщает информацию о себе
 func (p Person) String() string {
-	return p.name
+	return p.Name
 }
