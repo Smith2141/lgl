@@ -63,7 +63,7 @@
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [
-                "$go-test"
+                "$go"
             ]
         },
         {
