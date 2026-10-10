@@ -20,14 +20,10 @@ func New(seed int64) io.Reader {
 
 // Read — реализация io.Reader
 func (g *generator) Read(bytes []byte) (n int, err error) { // error — это тип ошибки, подробнее мы рассмотрим его в следующем разделе.
-	for min := range len(bytes) / 8 {
-		min *= 8
-		var max = min + 8
-		// fmt.Println("min=", min, "max=", max)
-		randInt := uint64(g.rnd.Int63()) // функция возвращает положительное число в пределах от 0 до 2^63
-
-		bytesPart := bytes[min:max]
-		binary.LittleEndian.PutUint64(bytesPart, randInt)
+	// for min := range len(bytes) / 8 {
+	// min *= 8
+	for min := 0; min+8 < len(bytes); min += 8 {
+		binary.LittleEndian.PutUint64(bytes[min:min+8], uint64(g.rnd.Int63()))
 	}
 	return len(bytes), nil
 }
