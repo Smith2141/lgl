@@ -2,29 +2,24 @@ package main
 
 import (
 	"fmt"
+	"time"
 
-	. "github.com/Smith2141/lgl/company"
-	. "github.com/Smith2141/lgl/person"
-	. "github.com/Smith2141/lgl/robot"
+	"github.com/Smith2141/lgl/example/randbyte"
 )
 
 func main() {
-	var person Person = Person{Name: "Tom"}
-	var company Company = Company{}
-	var robot Robot = Robot{Model: "T1000", SerialId: 111, WorkCounter: 0}
-	var robo *Robot = &robot
 
-	var tasksW1 = []string{"Задача 1", "Задача 2", "Задача 3"}
-	var tasksW2 = []string{"Задача 4", "Задача 5", "Задача 6"}
+	// создаём генератор случайных чисел
+	generator := randbyte.New(time.Now().UnixNano()) // в качестве затравки передаём ему текущее время, и при каждом запуске оно будет разным.
+	// var num64 int64 = 1
 
-	company.Hire(person) // мы передаём переменную типа Person в функцию, аргументом которой является переменная Worker!
-	company.Hire(robo)
+	buf := make([]byte, 16)
 
-	var roboWorking = robo.Work(tasksW1)
-	fmt.Println("robot working: ", roboWorking)
+	for range 5 {
+		// generator := randbyte.New(time.Now().UnixNano()) // в качестве затравки передаём ему текущее время, и при каждом запуске оно будет разным.
+		// generator := randbyte.New(num64) // в качестве затравки передаём ему текущее время, и при каждом запуске оно будет разным.
+		n, _ := generator.Read(buf) // единственный доступный метод, но он нам и нужен.
+		fmt.Printf("Generate bytes: %v size(%d)\n", buf, n)
+	}
 
-	var personWorking = person.Work(tasksW2)
-	fmt.Println("human working: ", personWorking)
-
-	fmt.Println("end")
 }
