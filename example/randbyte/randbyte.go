@@ -1,6 +1,7 @@
 package randbyte
 
 import (
+	"encoding/binary"
 	"io"
 	"math/rand"
 )
@@ -19,10 +20,14 @@ func New(seed int64) io.Reader {
 
 // Read — реализация io.Reader
 func (g *generator) Read(bytes []byte) (n int, err error) { // error — это тип ошибки, подробнее мы рассмотрим его в следующем разделе.
-	for i := range bytes {
-		randInt := g.rnd.Int63()  // функция возвращает положительное число в пределах от 0 до 2^63
-		randByte := byte(randInt) // приводим к типу byte
-		bytes[i] = randByte
+	for min := range len(bytes) / 8 {
+		min *= 8
+		var max = min + 8
+		// fmt.Println("min=", min, "max=", max)
+		randInt := uint64(g.rnd.Int63()) // функция возвращает положительное число в пределах от 0 до 2^63
+
+		bytesPart := bytes[min:max]
+		binary.LittleEndian.PutUint64(bytesPart, randInt)
 	}
 	return len(bytes), nil
 }
