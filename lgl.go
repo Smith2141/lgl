@@ -1,26 +1,30 @@
 package main
 
 import (
-	"fmt"
-	"github.com/Smith2141/lgl/example/randbyte"
-	"github.com/Smith2141/lgl/hashbyte"
-	"time"
+	// "fmt"
+	"io"
+	"log"
+	"os"
+	"strings"
 )
 
+func LimitReader(r io.Reader, n int) io.Reader {
+	buf := make([]byte, n)
+	var builder strings.Builder
+
+	r.Read(buf)
+	builder.Write(buf)
+	limReader := strings.NewReader(builder.String())
+
+	return limReader
+}
+
 func main() {
+	r := strings.NewReader("some io.Reader stream to be read\n")
+	lr := LimitReader(r, 4)
 
-	// создаём генератор случайных чисел
-	generator := randbyte.New(time.Now().UnixNano()) // в качестве затравки передаём ему текущее время — при каждом запуске оно будет разным
-
-	buf := make([]byte, 16)
-
-	for range 5 {
-		n, _ := generator.Read(buf)
-		fmt.Printf("Generate bytes: %v size(%d)\n", buf, n)
-
-		hasher := hashbyte.New(0)
-		hasher.Write(buf)
-		fmt.Printf("Hash: %v \n", hasher.Hash())
+	_, err := io.Copy(os.Stdout, lr)
+	if err != nil {
+		log.Fatal(err)
 	}
-
 }
