@@ -2,22 +2,22 @@ package main
 
 import (
 	"fmt"
-	"time"
-
-	"github.com/Smith2141/lgl/example/randbyte"
+	"math"
+	"strings"
 )
 
 func main() {
+// создаём strings.Builder
+w := strings.Builder{}
 
-	// создаём генератор случайных чисел
-	generator := randbyte.New(time.Now().UnixNano()) // в качестве затравки передаём ему текущее время, и при каждом запуске оно будет разным.
+for range 50 {
+    // функция fmt.Fprintf принимает аргументом io.Writer
+    // благодаря этому можно записывать форматированный вывод
+    fmt.Fprintf(&w, "%v", math.NaN())
+}
 
-	// buf := make([]byte, 16)
-	buf := make([]byte, 24)
+w.Write([]byte("... BATMAN!"))
 
-	for range 5 {
-		n, _ := generator.Read(buf) // единственный доступный метод, но он нам и нужен.
-		fmt.Printf("Generate bytes: %v size(%d)\n", buf, n)
-	}
-
+// выводим собранную строку
+fmt.Printf("%s\n", &w)
 }
