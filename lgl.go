@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func Mul(a interface{}, b int) interface{} {
+func Mul(a any, b int) any {
 	switch va := a.(type) {
 	case string:
 		return strings.Repeat(va, b)
