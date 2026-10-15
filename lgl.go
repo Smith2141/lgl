@@ -2,47 +2,31 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"reflect"
 )
 
-// Собственный тип для ошибок. Аналогичен стандартному error
-type Error interface {
-	Error() string
-}
+type MyType struct{}
 
-// MyError — структура, реализующая нашу ошибку
-type MyError struct {
-	// ...
-}
+func IsNil(obj interface{}) bool {
+    if obj == nil {
+        return true
+    }
 
-// Error — метод для удовлетворения интерфейсу Error
-func (e *MyError) Error() string {
-	return "..."
-}
+    objValue := reflect.ValueOf(obj)
+    // проверяем, что тип значения ссылочный, то есть в принципе может быть равен nil
+    if objValue.Kind() != reflect.Ptr {
+        return false
+    } 
+    // проверяем, что значение равно nil 
+    //  важно, что IsNil() вызывает панику, если value не является ссылочным типом. Поэтому всегда проверяйте на Kind() 
+    if  objValue.IsNil() {
+        return true
+    }
 
-// переменная типа ошибки — указатель на пустую структуру
-var ErrFriday13 = &MyError{}
-
-func CheckTodayIsOkay() Error {
-	var err *MyError // указатель на переменную типа Error
-	// получаем текущее время
-	t := time.Now()
-	// если день недели пятница и число месяца 13, то вернём ошибку
-	if t.Weekday() == time.Friday && t.Day() == 13 {
-		fmt.Println("in condition")
-		err = ErrFriday13
-	}
-	// вернём ошибку ... указатель же nil
-	return err
+    return false
 }
 
 func main() {
-	err := CheckTodayIsOkay()
-	// проверяем err на nil — и внезапно всегда не nil
-	if err != nil {
-		fmt.Println("error is not nil")
-		return
-	}
-
-	fmt.Println("error is nil")
+    var t *MyType
+    fmt.Printf("Проверка типа (%v) на nil: %v\n", reflect.TypeOf(t), IsNil(t)) // TypeOf возвращает тип переданного объекта. 
 }
