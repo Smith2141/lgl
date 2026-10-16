@@ -7,14 +7,14 @@ import (
 
 type MyType struct{}
 
-func IsNil(obj interface{}) bool {
+func IsNil(obj any) bool {
     if obj == nil {
         return true
     }
 
     objValue := reflect.ValueOf(obj)
     // проверяем, что тип значения ссылочный, то есть в принципе может быть равен nil
-    if objValue.Kind() != reflect.Ptr {
+    if objValue.Kind() != reflect.Pointer {
         return false
     } 
     // проверяем, что значение равно nil 
