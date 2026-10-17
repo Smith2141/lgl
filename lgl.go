@@ -2,63 +2,103 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 )
 
-func ExtendedPrint(v any) {
-	val := reflect.ValueOf(v)
-	//  проверяем, а не передали ли нам указатель на структуру
-	switch val.Kind() {
-	case reflect.Pointer:
-		fmt.Println("Hello 1!!!")
-		if val.Elem().Kind() != reflect.Struct {
-			fmt.Println("Hello 2!!!")
-			fmt.Printf("Pointer to %v : %v", val.Elem().Type(), val.Elem())
-			return
-		}
-		// если всё-таки это указатель на структуру, дальше будем работать с самой структурой
-		val = val.Elem()
+type Spell interface {
+	// название заклинания
+	Name() string
+	// характеристика, на которую воздействует
+	Char() string
+	// количественное значение
+	Value() int
+}
 
-	case reflect.Struct: // работаем со структурой
-	default:
-		fmt.Println("Hello 3!!!")
-		fmt.Printf("%v : %v", val.Type(), val)
-		return
-	}
+// CastReceiver — если объект удовлетворяет этом интерфейсу, то заклинание применяется через него
+type CastReceiver interface {
+	ReceiveSpell(s Spell)
+}
 
-	fmt.Println("Hello 4!!!")
-	fmt.Printf("Struct of type %v and number of fields %d:\n", val.Type(), val.NumField())
-	for fieldIndex := 0; fieldIndex < val.NumField(); fieldIndex++ {
-	// for _,fieldIndex range val.NumField() {
-		field := val.Field(fieldIndex) // field — тоже Value
-		fmt.Printf("\tField %v: %v - val :%v\n", val.Type().Field(fieldIndex).Name, field.Type(), field)
-		// имя поля мы получаем не из значения поля, а из его типа.
+func CastToAll(spell Spell, objects []interface{}) {
+	for _, obj := range objects {
+		CastTo(spell, obj)
 	}
 }
 
-type MyStruct struct {
-	A int
-	B string
-	C bool
+func CastTo(spell Spell, object interface{}) {
+	// реализуйте эту функцию.
+}
+
+type spell struct {
+	name string
+	char string
+	val  int
+}
+
+func newSpell(name string, char string, val int) Spell {
+	return &spell{name: name, char: char, val: val}
+}
+
+func (s spell) Name() string {
+	return s.name
+}
+
+func (s spell) Char() string {
+	return s.char
+}
+
+func (s spell) Value() int {
+	return s.val
+}
+
+type Player struct {
+	name   string
+	health int
+}
+
+func (p *Player) ReceiveSpell(s Spell) {
+	if s.Char() == "Health" {
+		p.health += s.Value()
+	}
+}
+
+type Zombie struct {
+	Health int
+}
+
+type Daemon struct {
+	Health int
+}
+
+type Orc struct {
+	Health int
+}
+
+type Wall struct {
+	Durability int
 }
 
 func main() {
-	// s := MyStruct{
-	// 	A: 3,
-	// 	B: "some",
-	// 	C: false,
-	// }
-	s1 := &MyStruct{
-		A: 7,
-		B: "text",
-		C: true,
+
+	player := &Player{
+		name:   "Player_1",
+		health: 100,
 	}
 
-	// ExtendedPrint(s)
-	ExtendedPrint(s1)
-	// ExtendedPrint(struct {
-	// 	E int
-	// 	C string
-	// }{2, "other text"})
-	// ExtendedPrint("some string")
+	enemies := []interface{}{
+		&Zombie{Health: 1000},
+		&Zombie{Health: 1000},
+		&Orc{Health: 500},
+		&Orc{Health: 500},
+		&Orc{Health: 500},
+		&Daemon{Health: 1000},
+		&Daemon{Health: 1000},
+		&Wall{Durability: 100},
+	}
+
+	CastToAll(newSpell("fire", "Health", -50), append(enemies, player))
+	CastToAll(newSpell("heal", "Health", 190), append(enemies, player))
+
+	fmt.Println(player)
 }
