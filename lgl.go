@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	// "log"
+	"log"
 	"reflect"
 )
 
@@ -33,22 +33,38 @@ func CastToAll(spell Spell, objects []any) {
 func CastTo(spell Spell, object any) {
 	if val, ok := object.(CastReceiver); ok {
 		val.ReceiveSpell(spell)
-	} else {
-		val := reflect.ValueOf(object)
-		if val.Kind() != reflect.Pointer {
-			return
-		}
-
-		val = val.Elem()
-
-		for fieldIndex := 0; fieldIndex < val.NumField(); fieldIndex++ {
-			field := val.Field(fieldIndex) // field — тоже Value
-
-			if val.Type().Field(fieldIndex).Name == spell.Char() {
-				field.SetInt(field.Int() + int64(spell.Value()))
-			}
-		}
+		return
 	}
+
+	val := reflect.ValueOf(object)
+
+	// проверяем, что переданный объект — указатель на структуру
+	if val.Kind() != reflect.Pointer || val.Elem().Kind() != reflect.Struct {
+		return
+	}
+
+	// ищем в структуре нужную характеристику
+	field := val.Elem().FieldByName(spell.Char())
+	// не нашли
+	if !field.IsValid() {
+		return
+	}
+
+	// нашли, но изменить её нельзя
+	if !field.CanSet() {
+		return
+	}
+
+	// тип найденного поля — не целое число
+	if field.Kind() != reflect.Int && field.Kind() != reflect.Int8 &&
+		field.Kind() != reflect.Int16 && field.Kind() != reflect.Int32 &&
+		field.Kind() != reflect.Int64 {
+		return
+	}
+
+	field.SetInt(field.Int() + int64(spell.Value()))
+
+	log.Printf("Casted spell %s to %#v", spell.Name(), object)
 }
 
 type spell struct {
