@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	// "log"
 	"reflect"
 )
 
@@ -15,19 +15,40 @@ type Spell interface {
 	Value() int
 }
 
-// CastReceiver — если объект удовлетворяет этом интерфейсу, то заклинание применяется через него
+// CastReceiver — если объект удовлетворяет этом интерфейсу,
+// то заклинание применяется через него
 type CastReceiver interface {
 	ReceiveSpell(s Spell)
 }
 
-func CastToAll(spell Spell, objects []interface{}) {
+func CastToAll(spell Spell, objects []any) {
 	for _, obj := range objects {
+		// fmt.Println("before: ", obj)
 		CastTo(spell, obj)
+		// fmt.Println("after: ", obj)
 	}
 }
 
-func CastTo(spell Spell, object interface{}) {
-	// реализуйте эту функцию.
+// реализуйте эту функцию.
+func CastTo(spell Spell, object any) {
+	if val, ok := object.(CastReceiver); ok {
+		val.ReceiveSpell(spell)
+	} else {
+		val := reflect.ValueOf(object)
+		if val.Kind() != reflect.Pointer {
+			return
+		}
+
+		val = val.Elem()
+
+		for fieldIndex := 0; fieldIndex < val.NumField(); fieldIndex++ {
+			field := val.Field(fieldIndex) // field — тоже Value
+
+			if val.Type().Field(fieldIndex).Name == spell.Char() {
+				field.SetInt(field.Int() + int64(spell.Value()))
+			}
+		}
+	}
 }
 
 type spell struct {
@@ -86,7 +107,7 @@ func main() {
 		health: 100,
 	}
 
-	enemies := []interface{}{
+	enemies := []any{
 		&Zombie{Health: 1000},
 		&Zombie{Health: 1000},
 		&Orc{Health: 500},
